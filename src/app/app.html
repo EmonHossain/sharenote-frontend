@@ -177,6 +177,7 @@
           @for (panel of panels(); track panel.id; let panelIndex = $index) {
             <section
               class="browser-column"
+              [class.last-browser-column]="$last"
               [attr.aria-label]="panel.title + ' panel'"
               [attr.data-panel-id]="panel.id"
             >
@@ -226,60 +227,60 @@
               }
             </section>
           }
-
-          <aside class="preview-column" aria-label="Item preview">
-            <div class="preview-paper">
-              <div class="paper-topline">
-                <span class="paper-badge">{{ previewLabel() }}</span>
-                <button type="button" aria-label="More options">•••</button>
-              </div>
-              <div class="paper-icon"><span></span><span></span><span></span></div>
-              <h1>{{ activeItem().name }}</h1>
-              <p class="paper-summary">
-                {{ previewSummary() }}
-              </p>
-
-              <div class="insight-card">
-                <span>{{ activeItem().kind === 'note' ? 'Key insight' : 'Folder status' }}</span>
-                <strong>{{
-                  activeItem().kind === 'note'
-                    ? 'People want a calmer way to move between ideas without losing context.'
-                    : hasChildren(activeItem())
-                      ? 'Choose a child item to open the next column.'
-                      : 'There are no child items, so no additional column is created.'
-                }}</strong>
-              </div>
-
-              <div class="paper-lines"><span></span><span></span><span></span><span></span></div>
-            </div>
-
-            <div class="preview-meta">
-              <dl>
-                <div>
-                  <dt>Kind</dt>
-                  <dd>{{ activeItem().kind === 'note' ? 'ShareNote document' : 'Folder' }}</dd>
-                </div>
-                <div>
-                  <dt>Size</dt>
-                  <dd>{{ activeItem().size ?? '—' }}</dd>
-                </div>
-                <div>
-                  <dt>Modified</dt>
-                  <dd>{{ activeItem().modified ?? '—' }}</dd>
-                </div>
-                <div>
-                  <dt>Owner</dt>
-                  <dd>{{ username }}</dd>
-                </div>
-              </dl>
-              <div class="tag-list">
-                <span>research</span>
-                <span>product</span>
-                <button type="button">+ Add tag</button>
-              </div>
-            </div>
-          </aside>
         </div>
+
+        <aside class="preview-column" aria-label="Item preview">
+          <div class="preview-paper">
+            <div class="paper-topline">
+              <span class="paper-badge">{{ previewLabel() }}</span>
+              <button type="button" aria-label="More options">•••</button>
+            </div>
+            <div class="paper-icon"><span></span><span></span><span></span></div>
+            <h1>{{ activeItem().name }}</h1>
+            <p class="paper-summary">
+              {{ previewSummary() }}
+            </p>
+
+            <div class="insight-card">
+              <span>{{ activeItem().kind === 'note' ? 'Key insight' : 'Folder status' }}</span>
+              <strong>{{
+                activeItem().kind === 'note'
+                  ? 'People want a calmer way to move between ideas without losing context.'
+                  : hasChildren(activeItem())
+                    ? 'Choose a child item to open the next column.'
+                    : 'There are no child items, so no additional column is created.'
+              }}</strong>
+            </div>
+
+            <div class="paper-lines"><span></span><span></span><span></span><span></span></div>
+          </div>
+
+          <div class="preview-meta">
+            <dl>
+              <div>
+                <dt>Kind</dt>
+                <dd>{{ activeItem().kind === 'note' ? 'ShareNote document' : 'Folder' }}</dd>
+              </div>
+              <div>
+                <dt>Size</dt>
+                <dd>{{ activeItem().size ?? '—' }}</dd>
+              </div>
+              <div>
+                <dt>Modified</dt>
+                <dd>{{ activeItem().modified ?? '—' }}</dd>
+              </div>
+              <div>
+                <dt>Owner</dt>
+                <dd>{{ username }}</dd>
+              </div>
+            </dl>
+            <div class="tag-list">
+              <span>research</span>
+              <span>product</span>
+              <button type="button">+ Add tag</button>
+            </div>
+          </div>
+        </aside>
       </div>
 
       <footer class="window-status">

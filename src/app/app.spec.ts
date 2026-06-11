@@ -30,6 +30,12 @@ describe('App', () => {
     expect(compiled.textContent).toContain('Product Design');
     expect(compiled.textContent).toContain('User interview insights');
     expect(compiled.querySelectorAll('.browser-column')).toHaveLength(5);
+    expect(
+      compiled
+        .querySelector('.columns-viewport')
+        ?.nextElementSibling?.classList.contains('preview-column'),
+    ).toBe(true);
+    expect(compiled.querySelectorAll('.last-browser-column')).toHaveLength(1);
   });
 
   it('adds child panels for branches and removes them for leaf folders', async () => {
