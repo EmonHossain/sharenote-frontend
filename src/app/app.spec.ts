@@ -29,5 +29,37 @@ describe('App', () => {
     expect(compiled.querySelector('.finder-window')).toBeTruthy();
     expect(compiled.textContent).toContain('Product Design');
     expect(compiled.textContent).toContain('User interview insights');
+    expect(compiled.querySelectorAll('.browser-column')).toHaveLength(5);
+  });
+
+  it('adds child panels for branches and removes them for leaf folders', async () => {
+    const fixture = TestBed.createComponent(App);
+    const app = fixture.componentInstance;
+    app['username'] = 'alex';
+    app['password'] = 'secret';
+    app['signIn']();
+    fixture.detectChanges();
+
+    const designSystem = app['findNode']('design-system');
+    expect(designSystem).toBeTruthy();
+    app['selectNode'](2, designSystem!);
+    fixture.detectChanges();
+    await fixture.whenStable();
+
+    let compiled = fixture.nativeElement as HTMLElement;
+    expect(compiled.querySelectorAll('.browser-column')).toHaveLength(3);
+    expect(compiled.textContent).toContain(
+      'There are no child items, so no additional column is created.',
+    );
+
+    const planning = app['findNode']('planning');
+    expect(planning).toBeTruthy();
+    app['selectNode'](2, planning!);
+    fixture.detectChanges();
+    await fixture.whenStable();
+
+    compiled = fixture.nativeElement as HTMLElement;
+    expect(compiled.querySelectorAll('.browser-column')).toHaveLength(4);
+    expect(compiled.textContent).toContain('Roadmap');
   });
 });

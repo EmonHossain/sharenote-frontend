@@ -151,12 +151,12 @@
             </button>
 
             <p class="sidebar-label">Workspaces</p>
-            @for (space of collections.slice(0, 5); track space.name) {
+            @for (space of sidebarCollections().slice(0, 5); track space.id) {
               <button
                 class="sidebar-item"
                 type="button"
-                [class.active-sidebar]="selectedCollection() === space.name"
-                (click)="selectCollection(space.name)"
+                [class.active-sidebar]="selectedPath()[1]?.id === space.id"
+                (click)="selectCollection(space)"
               >
                 <i class="workspace-dot" [style.background]="space.accent"></i>
                 {{ space.name }}
@@ -174,116 +174,80 @@
         </aside>
 
         <div class="columns-viewport">
-          <section class="browser-column location-column" aria-label="Locations">
-            <div class="column-heading">
-              <span>Browse</span>
-            </div>
-            @for (item of locations; track item.name) {
-              <button
-                class="file-row"
-                type="button"
-                [class.selected-row]="selectedLocation() === item.name"
-                (click)="selectLocation(item.name)"
-              >
-                <span class="folder-icon" [style.--folder-color]="item.accent"></span>
-                <span class="row-copy">
-                  <strong>{{ item.name }}</strong>
-                  <small>{{ item.detail }}</small>
-                </span>
-                <svg class="chevron" viewBox="0 0 24 24"><path d="m9 18 6-6-6-6" /></svg>
-              </button>
-            }
-          </section>
-
-          <section class="browser-column collection-column" aria-label="Workspaces">
-            <div class="column-heading">
-              <span>{{ selectedLocation() }}</span>
-              <button type="button" aria-label="Add workspace">+</button>
-            </div>
-            @for (item of collections; track item.name) {
-              <button
-                class="file-row"
-                type="button"
-                [class.selected-row]="selectedCollection() === item.name"
-                (click)="selectCollection(item.name)"
-              >
-                <span class="folder-icon" [style.--folder-color]="item.accent"></span>
-                <span class="row-copy">
-                  <strong>{{ item.name }}</strong>
-                  <small>{{ item.detail }}</small>
-                </span>
-                <svg class="chevron" viewBox="0 0 24 24"><path d="m9 18 6-6-6-6" /></svg>
-              </button>
-            }
-          </section>
-
-          <section class="browser-column folder-column" aria-label="Folders">
-            <div class="column-heading">
-              <span>{{ selectedCollection() }}</span>
-              <button type="button" aria-label="Add folder">+</button>
-            </div>
-            @for (item of folders; track item.name) {
-              <button
-                class="file-row"
-                type="button"
-                [class.selected-row]="selectedFolder() === item.name"
-                (click)="selectFolder(item.name)"
-              >
-                <span class="folder-icon neutral-folder"></span>
-                <span class="row-copy">
-                  <strong>{{ item.name }}</strong>
-                  <small>{{ item.detail }}</small>
-                </span>
-                <svg class="chevron" viewBox="0 0 24 24"><path d="m9 18 6-6-6-6" /></svg>
-              </button>
-            }
-
-            <div class="column-divider"></div>
-            <div class="notes-label">{{ selectedFolder() }} notes</div>
-
-            @for (item of visibleNotes(); track item.name) {
-              <button
-                class="file-row note-row"
-                type="button"
-                [class.selected-row]="selectedNote() === item.name"
-                (click)="selectNote(item.name)"
-              >
-                <span class="note-icon"> <i></i><i></i><i></i> </span>
-                <span class="row-copy">
-                  <strong>{{ item.name }}</strong>
-                  <small>{{ item.modified }}</small>
-                </span>
-              </button>
-            } @empty {
-              <div class="empty-search">
-                <svg viewBox="0 0 24 24">
-                  <circle cx="11" cy="11" r="7" />
-                  <path d="m20 20-4-4" />
-                </svg>
-                <strong>No notes found</strong>
-                <span>Try a different search term.</span>
+          @for (panel of panels(); track panel.id; let panelIndex = $index) {
+            <section
+              class="browser-column"
+              [attr.aria-label]="panel.title + ' panel'"
+              [attr.data-panel-id]="panel.id"
+            >
+              <div class="column-heading">
+                <span>{{ panel.title }}</span>
+                <small>{{ panel.items.length }}</small>
               </div>
-            }
-          </section>
 
-          <aside class="preview-column" aria-label="Note preview">
+              @for (item of visiblePanelItems(panel); track item.id) {
+                <button
+                  class="file-row"
+                  type="button"
+                  [class.note-row]="item.kind === 'note'"
+                  [class.selected-row]="panel.selectedId === item.id"
+                  (click)="selectNode(panelIndex, item)"
+                >
+                  @if (item.kind === 'folder') {
+                    <span
+                      class="folder-icon"
+                      [class.neutral-folder]="!item.accent"
+                      [style.--folder-color]="item.accent"
+                    ></span>
+                  } @else {
+                    <span class="note-icon"> <i></i><i></i><i></i> </span>
+                  }
+
+                  <span class="row-copy">
+                    <strong>{{ item.name }}</strong>
+                    <small>{{ item.kind === 'note' ? item.modified : item.detail }}</small>
+                  </span>
+
+                  @if (hasChildren(item)) {
+                    <svg class="chevron" viewBox="0 0 24 24">
+                      <path d="m9 18 6-6-6-6" />
+                    </svg>
+                  }
+                </button>
+              } @empty {
+                <div class="empty-search">
+                  <svg viewBox="0 0 24 24">
+                    <circle cx="11" cy="11" r="7" />
+                    <path d="m20 20-4-4" />
+                  </svg>
+                  <strong>No items found</strong>
+                  <span>Try a different search term.</span>
+                </div>
+              }
+            </section>
+          }
+
+          <aside class="preview-column" aria-label="Item preview">
             <div class="preview-paper">
               <div class="paper-topline">
-                <span class="paper-badge">Research</span>
+                <span class="paper-badge">{{ previewLabel() }}</span>
                 <button type="button" aria-label="More options">•••</button>
               </div>
               <div class="paper-icon"><span></span><span></span><span></span></div>
-              <h1>{{ activeNote().name }}</h1>
+              <h1>{{ activeItem().name }}</h1>
               <p class="paper-summary">
-                A concise synthesis of what we heard, the patterns behind it, and the product
-                opportunities worth exploring next.
+                {{ previewSummary() }}
               </p>
 
               <div class="insight-card">
-                <span>Key insight</span>
-                <strong
-                  >People want a calmer way to move between ideas without losing context.</strong
-                >
+                <span>{{ activeItem().kind === 'note' ? 'Key insight' : 'Folder status' }}</span>
+                <strong>{{
+                  activeItem().kind === 'note'
+                    ? 'People want a calmer way to move between ideas without losing context.'
+                    : hasChildren(activeItem())
+                      ? 'Choose a child item to open the next column.'
+                      : 'There are no child items, so no additional column is created.'
+                }}</strong>
               </div>
 
               <div class="paper-lines"><span></span><span></span><span></span><span></span></div>
@@ -293,15 +257,15 @@
               <dl>
                 <div>
                   <dt>Kind</dt>
-                  <dd>ShareNote document</dd>
+                  <dd>{{ activeItem().kind === 'note' ? 'ShareNote document' : 'Folder' }}</dd>
                 </div>
                 <div>
                   <dt>Size</dt>
-                  <dd>{{ activeNote().size }}</dd>
+                  <dd>{{ activeItem().size ?? '—' }}</dd>
                 </div>
                 <div>
                   <dt>Modified</dt>
-                  <dd>{{ activeNote().modified }}</dd>
+                  <dd>{{ activeItem().modified ?? '—' }}</dd>
                 </div>
                 <div>
                   <dt>Owner</dt>
@@ -319,8 +283,8 @@
       </div>
 
       <footer class="window-status">
-        <span>{{ visibleNotes().length }} notes</span>
-        <span>{{ selectedLocation() }} / {{ selectedCollection() }} / {{ selectedFolder() }}</span>
+        <span>{{ activePanelItemCount() }} items</span>
+        <span>{{ breadcrumb() }}</span>
         <span>Synced just now</span>
       </footer>
     </section>
