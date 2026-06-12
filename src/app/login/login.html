@@ -1,0 +1,93 @@
+<main class="login-shell">
+  <section class="login-card" aria-labelledby="login-title">
+    <div class="login-visual" aria-hidden="true">
+      <div class="visual-orb orb-one"></div>
+      <div class="visual-orb orb-two"></div>
+      <div class="visual-copy">
+        <div class="brand-mark large-mark">
+          <span></span>
+          <span></span>
+          <span></span>
+        </div>
+        <p class="eyebrow light">Your ideas, beautifully organized</p>
+        <h2>One calm place for every note.</h2>
+        <p>
+          Move through projects, research, and shared knowledge with the clarity of a familiar
+          desktop workspace.
+        </p>
+      </div>
+      <div class="mini-window">
+        <div class="mini-toolbar">
+          <i></i><i></i><i></i>
+          <span>Product Design</span>
+        </div>
+        <div class="mini-body">
+          <div class="mini-sidebar"></div>
+          <div class="mini-column"><b></b><b></b><b class="selected"></b><b></b></div>
+          <div class="mini-column"><b></b><b class="selected"></b><b></b></div>
+          <div class="mini-preview"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="login-form-wrap">
+      <div class="mobile-brand">
+        <div class="brand-mark"><span></span><span></span><span></span></div>
+        <strong>ShareNote</strong>
+      </div>
+      <p class="eyebrow">Welcome back</p>
+      <h1 id="login-title">Sign in to ShareNote</h1>
+      <p class="login-subtitle">Open your workspace and pick up where you left off.</p>
+
+      <form (ngSubmit)="signIn()" class="login-form">
+        <label for="username">Username</label>
+        <div class="input-wrap">
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M20 21a8 8 0 0 0-16 0M12 13a5 5 0 1 0 0-10 5 5 0 0 0 0 10Z" />
+          </svg>
+          <input
+            id="username"
+            name="username"
+            type="text"
+            [(ngModel)]="username"
+            autocomplete="username"
+            placeholder="Enter your username"
+          />
+        </div>
+
+        <label for="password">Password</label>
+        <div class="input-wrap">
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <rect x="4" y="10" width="16" height="11" rx="3" />
+            <path d="M8 10V7a4 4 0 0 1 8 0v3M12 15v2" />
+          </svg>
+          <input
+            id="password"
+            name="password"
+            type="password"
+            [(ngModel)]="password"
+            autocomplete="current-password"
+            placeholder="Enter your password"
+          />
+        </div>
+
+        @if (loginError() || apiError()) {
+          <p class="form-error" role="alert">{{ loginError() || apiError() }}</p>
+        }
+
+        <button class="sign-in-button" type="submit" [disabled]="busy()">
+          <span>{{ busy() ? 'Signing in…' : 'Sign in' }}</span>
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path d="m9 18 6-6-6-6" />
+          </svg>
+        </button>
+      </form>
+
+      <p class="registration-prompt">
+        Not registered yet?
+        <button type="button" (click)="registrationRequested.emit()">Create an account</button>
+      </p>
+      <p class="login-footnote">Secure access to your private workspace</p>
+    </div>
+  </section>
+</main>
