@@ -1,293 +1,41 @@
-@if (!isAuthenticated()) {
-  <main class="login-shell">
-    <section class="login-card" aria-labelledby="login-title">
-      <div class="login-visual" aria-hidden="true">
-        <div class="visual-orb orb-one"></div>
-        <div class="visual-orb orb-two"></div>
-        <div class="visual-copy">
-          <div class="brand-mark large-mark">
-            <span></span>
-            <span></span>
-            <span></span>
-          </div>
-          <p class="eyebrow light">Your ideas, beautifully organized</p>
-          <h2>One calm place for every note.</h2>
-          <p>
-            Move through projects, research, and shared knowledge with the clarity of a familiar
-            desktop workspace.
-          </p>
-        </div>
-        <div class="mini-window">
-          <div class="mini-toolbar">
-            <i></i><i></i><i></i>
-            <span>Product Design</span>
-          </div>
-          <div class="mini-body">
-            <div class="mini-sidebar"></div>
-            <div class="mini-column"><b></b><b></b><b class="selected"></b><b></b></div>
-            <div class="mini-column"><b></b><b class="selected"></b><b></b></div>
-            <div class="mini-preview"></div>
-          </div>
-        </div>
-      </div>
-
-      <div class="login-form-wrap">
-        <div class="mobile-brand">
-          <div class="brand-mark"><span></span><span></span><span></span></div>
-          <strong>ShareNote</strong>
-        </div>
-        <p class="eyebrow">Welcome back</p>
-        <h1 id="login-title">Sign in to ShareNote</h1>
-        <p class="login-subtitle">Open your workspace and pick up where you left off.</p>
-
-        <form (ngSubmit)="signIn()" class="login-form">
-          <label for="username">Username</label>
-          <div class="input-wrap">
-            <svg viewBox="0 0 24 24" aria-hidden="true">
-              <path d="M20 21a8 8 0 0 0-16 0M12 13a5 5 0 1 0 0-10 5 5 0 0 0 0 10Z" />
-            </svg>
-            <input
-              id="username"
-              name="username"
-              type="text"
-              [(ngModel)]="username"
-              autocomplete="username"
-              placeholder="Enter your username"
-            />
-          </div>
-
-          <label for="password">Password</label>
-          <div class="input-wrap">
-            <svg viewBox="0 0 24 24" aria-hidden="true">
-              <rect x="4" y="10" width="16" height="11" rx="3" />
-              <path d="M8 10V7a4 4 0 0 1 8 0v3M12 15v2" />
-            </svg>
-            <input
-              id="password"
-              name="password"
-              type="password"
-              [(ngModel)]="password"
-              autocomplete="current-password"
-              placeholder="Enter your password"
-            />
-          </div>
-
-          @if (loginError()) {
-            <p class="form-error" role="alert">{{ loginError() }}</p>
-          }
-
-          <button class="sign-in-button" type="submit">
-            <span>Sign in</span>
-            <svg viewBox="0 0 24 24" aria-hidden="true">
-              <path d="m9 18 6-6-6-6" />
-            </svg>
-          </button>
-        </form>
-
-        <p class="login-footnote">Secure access to your private workspace</p>
-      </div>
-    </section>
+@if (restoringSession()) {
+  <main class="auth-loading-shell" aria-label="Restoring session">
+    <div class="brand-mark loading-mark"><span></span><span></span><span></span></div>
+    <span>Restoring your secure session…</span>
   </main>
+} @else if (auth.session(); as activeSession) {
+  @if (activeSession.accessLevel === 'full') {
+    <app-workspace
+      [username]="activeSession.user.username"
+      [displayName]="activeSession.user.firstName + ' ' + activeSession.user.lastName"
+      [futureOrganizationIdRequired]="activeSession.futureOrganizationIdRequired"
+      (logout)="handleLogout()"
+    />
+  } @else {
+    <app-verification
+      [session]="activeSession"
+      [busy]="auth.busy()"
+      [apiError]="auth.error()"
+      [notice]="notice()"
+      (verifyEmail)="handleEmailVerification($event)"
+      (resendEmail)="handleResendEmail()"
+      (organizationIdSelected)="handleOrganizationId($event)"
+      (personalFileSelected)="handlePersonalFile($event)"
+      (logout)="handleLogout()"
+    />
+  }
+} @else if (authView() === 'registration') {
+  <app-registration
+    [busy]="auth.busy()"
+    [apiError]="auth.error()"
+    (register)="handleRegistration($event)"
+    (loginRequested)="authView.set('login')"
+  />
 } @else {
-  <main class="desktop-shell">
-    <section class="finder-window" aria-label="ShareNote file browser">
-      <header class="window-toolbar">
-        <div class="toolbar-brand">
-          <div class="brand-mark"><span></span><span></span><span></span></div>
-          <strong>ShareNote</strong>
-        </div>
-
-        <div class="search-box">
-          <svg viewBox="0 0 24 24" aria-hidden="true">
-            <circle cx="11" cy="11" r="7" />
-            <path d="m20 20-4-4" />
-          </svg>
-          <input
-            type="search"
-            aria-label="Search notes"
-            placeholder="Search"
-            [ngModel]="searchTerm()"
-            (ngModelChange)="searchTerm.set($event)"
-          />
-          @if (searchTerm()) {
-            <button type="button" aria-label="Clear search" (click)="searchTerm.set('')">x</button>
-          }
-        </div>
-
-        <button class="avatar-button" type="button" aria-label="Sign out" (click)="signOut()">
-          {{ username.slice(0, 1).toUpperCase() }}
-          <span>Sign out</span>
-        </button>
-      </header>
-
-      <div class="browser-body">
-        <aside class="finder-sidebar">
-          <div class="sidebar-profile">
-            <div class="profile-picture" aria-hidden="true">
-              <svg viewBox="0 0 40 40">
-                <circle cx="20" cy="15" r="7" />
-                <path d="M8 35c1.2-8 5.2-12 12-12s10.8 4 12 12" />
-              </svg>
-            </div>
-            <div class="profile-copy">
-              <strong>Alex Morgan</strong>
-              <span>&#64;{{ username }}</span>
-            </div>
-          </div>
-
-          <nav aria-label="Sidebar">
-            <p class="sidebar-label">Favorites</p>
-            <button class="sidebar-item active-sidebar" type="button">
-              All notes
-              <span>128</span>
-            </button>
-            <button class="sidebar-item" type="button">
-              Favorites
-              <span>12</span>
-            </button>
-            <button class="sidebar-item" type="button">
-              Shared
-              <span>18</span>
-            </button>
-
-            <p class="sidebar-label">Workspaces</p>
-            @for (space of sidebarCollections().slice(0, 5); track space.id) {
-              <button
-                class="sidebar-item"
-                type="button"
-                [class.active-sidebar]="selectedPath()[1]?.id === space.id"
-                (click)="selectCollection(space)"
-              >
-                <i class="workspace-dot" [style.background]="space.accent"></i>
-                {{ space.name }}
-              </button>
-            }
-          </nav>
-
-          <div class="storage-card">
-            <div>
-              <span>Storage</span>
-              <strong>2.4 GB of 10 GB</strong>
-            </div>
-            <div class="storage-track"><span></span></div>
-          </div>
-        </aside>
-
-        <div class="columns-viewport">
-          @for (panel of panels(); track panel.id; let panelIndex = $index) {
-            <section
-              class="browser-column"
-              [class.last-browser-column]="$last"
-              [attr.aria-label]="panel.title + ' panel'"
-              [attr.data-panel-id]="panel.id"
-            >
-              <div class="column-heading">
-                <span>{{ panel.title }}</span>
-                <small>{{ panel.items.length }}</small>
-              </div>
-
-              @for (item of visiblePanelItems(panel); track item.id) {
-                <button
-                  class="file-row"
-                  type="button"
-                  [class.note-row]="item.kind === 'note'"
-                  [class.selected-row]="panel.selectedId === item.id"
-                  (click)="selectNode(panelIndex, item)"
-                >
-                  @if (item.kind === 'folder') {
-                    <span
-                      class="folder-icon"
-                      [class.neutral-folder]="!item.accent"
-                      [style.--folder-color]="item.accent"
-                    ></span>
-                  } @else {
-                    <span class="note-icon"> <i></i><i></i><i></i> </span>
-                  }
-
-                  <span class="row-copy">
-                    <strong>{{ item.name }}</strong>
-                    <small>{{ item.kind === 'note' ? item.modified : item.detail }}</small>
-                  </span>
-
-                  @if (hasChildren(item)) {
-                    <svg class="chevron" viewBox="0 0 24 24">
-                      <path d="m9 18 6-6-6-6" />
-                    </svg>
-                  }
-                </button>
-              } @empty {
-                <div class="empty-search">
-                  <svg viewBox="0 0 24 24">
-                    <circle cx="11" cy="11" r="7" />
-                    <path d="m20 20-4-4" />
-                  </svg>
-                  <strong>No items found</strong>
-                  <span>Try a different search term.</span>
-                </div>
-              }
-            </section>
-          }
-        </div>
-
-        <aside class="preview-column" aria-label="Item preview">
-          <div class="preview-paper">
-            <div class="paper-topline">
-              <span class="paper-badge">{{ previewLabel() }}</span>
-              <button type="button" aria-label="More options">•••</button>
-            </div>
-            <div class="paper-icon"><span></span><span></span><span></span></div>
-            <h1>{{ activeItem().name }}</h1>
-            <p class="paper-summary">
-              {{ previewSummary() }}
-            </p>
-
-            <div class="insight-card">
-              <span>{{ activeItem().kind === 'note' ? 'Key insight' : 'Folder status' }}</span>
-              <strong>{{
-                activeItem().kind === 'note'
-                  ? 'People want a calmer way to move between ideas without losing context.'
-                  : hasChildren(activeItem())
-                    ? 'Choose a child item to open the next column.'
-                    : 'There are no child items, so no additional column is created.'
-              }}</strong>
-            </div>
-
-            <div class="paper-lines"><span></span><span></span><span></span><span></span></div>
-          </div>
-
-          <div class="preview-meta">
-            <dl>
-              <div>
-                <dt>Kind</dt>
-                <dd>{{ activeItem().kind === 'note' ? 'ShareNote document' : 'Folder' }}</dd>
-              </div>
-              <div>
-                <dt>Size</dt>
-                <dd>{{ activeItem().size ?? '—' }}</dd>
-              </div>
-              <div>
-                <dt>Modified</dt>
-                <dd>{{ activeItem().modified ?? '—' }}</dd>
-              </div>
-              <div>
-                <dt>Owner</dt>
-                <dd>{{ username }}</dd>
-              </div>
-            </dl>
-            <div class="tag-list">
-              <span>research</span>
-              <span>product</span>
-              <button type="button">+ Add tag</button>
-            </div>
-          </div>
-        </aside>
-      </div>
-
-      <footer class="window-status">
-        <span>{{ activePanelItemCount() }} items</span>
-        <span>{{ breadcrumb() }}</span>
-        <span>Synced just now</span>
-      </footer>
-    </section>
-  </main>
+  <app-login
+    [busy]="auth.busy()"
+    [apiError]="auth.error()"
+    (login)="handleLogin($event)"
+    (registrationRequested)="authView.set('registration')"
+  />
 }

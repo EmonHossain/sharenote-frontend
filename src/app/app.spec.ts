@@ -1,71 +1,66 @@
+import { provideHttpClient } from '@angular/common/http';
 import { TestBed } from '@angular/core/testing';
+import { AuthSession } from './auth/auth.models';
 import { App } from './app';
+
+const restoredSession: AuthSession = {
+  accessLevel: 'full',
+  user: {
+    id: 'restored-user',
+    username: 'alex',
+    firstName: 'Alex',
+    lastName: 'Morgan',
+    email: 'alex@acme.org',
+    gender: 'prefer_not_to_say',
+    phoneNumber: '+49 30 12345678',
+    organizationName: 'Acme',
+  },
+  verificationMethod: 'organization_email',
+  verificationStatus: 'fully_verified',
+  futureOrganizationIdRequired: true,
+};
 
 describe('App', () => {
   beforeEach(async () => {
+    localStorage.clear();
     await TestBed.configureTestingModule({
       imports: [App],
+      providers: [provideHttpClient()],
     }).compileComponents();
   });
 
-  it('shows the login portal by default', async () => {
+  it('shows the login component when there is no saved session', async () => {
     const fixture = TestBed.createComponent(App);
+    fixture.detectChanges();
     await fixture.whenStable();
+    fixture.detectChanges();
 
     const compiled = fixture.nativeElement as HTMLElement;
-    expect(compiled.querySelector('h1')?.textContent).toContain('Sign in to ShareNote');
-    expect(compiled.querySelector('input[type="password"]')).toBeTruthy();
+    expect(compiled.querySelector('app-login')).toBeTruthy();
+    expect(compiled.querySelector('app-workspace')).toBeFalsy();
   });
 
-  it('opens the Finder-style browser after valid form input', async () => {
+  it('restores an authenticated session after a refresh', async () => {
+    localStorage.setItem('sharenote.mock-session', JSON.stringify(restoredSession));
+
     const fixture = TestBed.createComponent(App);
-    fixture.componentInstance['username'] = 'alex';
-    fixture.componentInstance['password'] = 'secret';
-    fixture.componentInstance['signIn']();
     fixture.detectChanges();
     await fixture.whenStable();
+    fixture.detectChanges();
 
     const compiled = fixture.nativeElement as HTMLElement;
-    expect(compiled.querySelector('.finder-window')).toBeTruthy();
-    expect(compiled.textContent).toContain('Product Design');
-    expect(compiled.textContent).toContain('User interview insights');
-    expect(compiled.querySelectorAll('.browser-column')).toHaveLength(5);
-    expect(
-      compiled
-        .querySelector('.columns-viewport')
-        ?.nextElementSibling?.classList.contains('preview-column'),
-    ).toBe(true);
-    expect(compiled.querySelectorAll('.last-browser-column')).toHaveLength(1);
+    expect(compiled.querySelector('app-workspace')).toBeTruthy();
+    expect(compiled.textContent).toContain('Alex Morgan');
+    expect(compiled.textContent).toContain('Organization ID may be requested later');
   });
 
-  it('adds child panels for branches and removes them for leaf folders', async () => {
+  it('opens registration from the login view', async () => {
     const fixture = TestBed.createComponent(App);
-    const app = fixture.componentInstance;
-    app['username'] = 'alex';
-    app['password'] = 'secret';
-    app['signIn']();
-    fixture.detectChanges();
-
-    const designSystem = app['findNode']('design-system');
-    expect(designSystem).toBeTruthy();
-    app['selectNode'](2, designSystem!);
     fixture.detectChanges();
     await fixture.whenStable();
-
-    let compiled = fixture.nativeElement as HTMLElement;
-    expect(compiled.querySelectorAll('.browser-column')).toHaveLength(3);
-    expect(compiled.textContent).toContain(
-      'There are no child items, so no additional column is created.',
-    );
-
-    const planning = app['findNode']('planning');
-    expect(planning).toBeTruthy();
-    app['selectNode'](2, planning!);
+    fixture.componentInstance['authView'].set('registration');
     fixture.detectChanges();
-    await fixture.whenStable();
 
-    compiled = fixture.nativeElement as HTMLElement;
-    expect(compiled.querySelectorAll('.browser-column')).toHaveLength(4);
-    expect(compiled.textContent).toContain('Roadmap');
+    expect(fixture.nativeElement.querySelector('app-registration')).toBeTruthy();
   });
 });
