@@ -1,0 +1,137 @@
+<main class="registration-shell">
+  <section class="registration-card" aria-labelledby="registration-title">
+    <aside class="registration-guide">
+      <div class="brand-lockup">
+        <div class="brand-mark"><span></span><span></span><span></span></div>
+        <strong>ShareNote</strong>
+      </div>
+
+      <div>
+        <p class="eyebrow light">Create your account</p>
+        <h2>Start with your professional identity.</h2>
+        <p>
+          Your email determines the verification path. The backend remains the source of truth for
+          email classification and verification status.
+        </p>
+      </div>
+
+      <div class="verification-paths">
+        <article>
+          <span class="path-number">1</span>
+          <div>
+            <strong>Organization email</strong>
+            <p>Email verification unlocks the workspace. A photo ID may be requested later.</p>
+          </div>
+        </article>
+        <article>
+          <span class="path-number">2</span>
+          <div>
+            <strong>Public email</strong>
+            <p>Email verification is followed by organization photo-ID review.</p>
+          </div>
+        </article>
+      </div>
+    </aside>
+
+    <div class="registration-form-wrap">
+      <button class="back-link" type="button" (click)="loginRequested.emit()">
+        <svg viewBox="0 0 24 24"><path d="m15 18-6-6 6-6" /></svg>
+        Back to sign in
+      </button>
+
+      <p class="eyebrow">Registration</p>
+      <h1 id="registration-title">Tell us about yourself</h1>
+      <p class="registration-subtitle">All fields are required unless marked otherwise.</p>
+
+      <form class="registration-form" (ngSubmit)="submit()">
+        <div class="form-grid">
+          <label>
+            <span>First name</span>
+            <input
+              name="firstName"
+              [(ngModel)]="firstName"
+              autocomplete="given-name"
+              placeholder="Alex"
+            />
+          </label>
+
+          <label>
+            <span>Last name</span>
+            <input
+              name="lastName"
+              [(ngModel)]="lastName"
+              autocomplete="family-name"
+              placeholder="Morgan"
+            />
+          </label>
+
+          <label class="wide-field">
+            <span>Email address</span>
+            <input
+              name="email"
+              type="email"
+              [(ngModel)]="email"
+              autocomplete="email"
+              placeholder="alex@organization.org"
+            />
+          </label>
+
+          <label>
+            <span>Gender</span>
+            <select name="gender" [(ngModel)]="gender">
+              <option value="" disabled>Select gender</option>
+              <option value="female">Female</option>
+              <option value="male">Male</option>
+              <option value="non_binary">Non-binary</option>
+              <option value="prefer_not_to_say">Prefer not to say</option>
+            </select>
+          </label>
+
+          <label>
+            <span>Phone number</span>
+            <input
+              name="phoneNumber"
+              type="tel"
+              [(ngModel)]="phoneNumber"
+              autocomplete="tel"
+              placeholder="+49 30 12345678"
+            />
+          </label>
+
+          <label>
+            <span>Password</span>
+            <input
+              name="password"
+              type="password"
+              [(ngModel)]="password"
+              autocomplete="new-password"
+              placeholder="Minimum 8 characters"
+            />
+          </label>
+
+          <label>
+            <span>Confirm password</span>
+            <input
+              name="confirmPassword"
+              type="password"
+              [(ngModel)]="confirmPassword"
+              autocomplete="new-password"
+              placeholder="Repeat password"
+            />
+          </label>
+        </div>
+
+        @if (formError() || apiError()) {
+          <p class="form-error registration-error" role="alert">
+            {{ formError() || apiError() }}
+          </p>
+        }
+
+        <button class="sign-in-button registration-button" type="submit" [disabled]="busy()">
+          {{ busy() ? 'Creating account…' : 'Create account' }}
+          <svg viewBox="0 0 24 24"><path d="m9 18 6-6-6-6" /></svg>
+        </button>
+      </form>
+    </div>
+  </section>
+</main>
